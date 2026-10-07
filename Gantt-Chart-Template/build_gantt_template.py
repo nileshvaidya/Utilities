@@ -1,4 +1,4 @@
-"""Builds templates/Gantt_Chart_Template.xlsx (formula driven Gantt chart template)."""
+"""Builds Gantt_Chart_Template.xlsx (formula driven Gantt chart template)."""
 import datetime as dt
 import sys
 from openpyxl import Workbook
