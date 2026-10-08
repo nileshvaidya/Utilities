@@ -200,14 +200,14 @@ for w, col in ((wi, NAVY), (wt, BLUE), (wg, TEAL), (wh, PURPLE), (wa, GREY)):
 # =========================================================================
 NAMES = ["ID", "TASK", "OWN", "P1", "K1", "L1", "P2", "K2", "L2", "DUR", "SNET", "STAT", "ACTS", "ACTE", "PCT", "REV",
          "PS", "PE", "FS", "FE", "FD", "VAR", "DST", "SLIP", "IMP", "DEP", "CLS", "HASP", "SL1", "SL2", "EFS", "EFP",
-         "XEND", "WDN"]
+         "XEND", "WDN", "PEN", "FEN"]
 LT = {n: CL(i + 1) for i, n in enumerate(NAMES)}
 HEADS = ["ID", "Task Name", "Owner", "Pred. 1 (ID)", "Link 1 (FS/SS/FF)", "Lag 1 (days)", "Pred. 2 (ID)",
          "Link 2 (FS/SS/FF)", "Lag 2 (days)", "Duration (work days)", "Start No Earlier Than (optional)", "Status",
          "Actual Start", "Actual End", "% Complete", "Revised Duration (if overshoot)", "Planned Start", "Planned End",
          "Forecast / Actual Start", "Forecast / Actual End", "Forecast / Actual Duration", "Duration Variance (days)",
          "Duration Status", "End Slip vs Plan (days)", "Impact (affected by)", "No. of Dependent Links",
-         "class", "has pred", "pred1 slip", "pred2 slip", "eff status", "eff %", "end if no overshoot", "weighted done"]
+         "class", "has pred", "pred1 slip", "pred2 slip", "eff status", "eff %", "end if no overshoot", "weighted done", "planned end (num)", "fcst end (num)"]
 T = lambda n: f"Tasks!${LT[n]}${FIRST}:${LT[n]}${LAST}"
 
 # =========================================================================
@@ -321,9 +321,9 @@ for i in range(3):
     key = COMPONENTS[i]
     put(wi, f"B{r}", key, font(10, True, "0000FF"), INPUT, CEN, bd=BOX)
     cnt = f'COUNTIF({T("TASK")},$B{r}&"*")'
-    put(wi, f"C{r}", f'=IF(OR($B{r}="",{cnt}=0),"",_xlfn.MAXIFS({T("PE")},{T("TASK")},$B{r}&"*"))', font(10, True), None, CEN, "dd-mmm-yyyy", BOX)
+    put(wi, f"C{r}", f'=IF(OR($B{r}="",{cnt}=0),"",SUMPRODUCT(MAX((LEFT({T("TASK")},LEN($B{r}))=$B{r})*{T("PEN")})))', font(10, True), None, CEN, "dd-mmm-yyyy", BOX)
     put(wi, f"D{r}", None, font(), None, None, None, BOX)
-    put(wi, f"E{r}", f'=IF(OR($B{r}="",{cnt}=0),"",_xlfn.MAXIFS({T("FE")},{T("TASK")},$B{r}&"*"))', font(10, True), None, CEN, "dd-mmm-yyyy", BOX)
+    put(wi, f"E{r}", f'=IF(OR($B{r}="",{cnt}=0),"",SUMPRODUCT(MAX((LEFT({T("TASK")},LEN($B{r}))=$B{r})*{T("FEN")})))', font(10, True), None, CEN, "dd-mmm-yyyy", BOX)
     put(wi, f"F{r}", f'=IF(OR(C{r}="",E{r}=""),"",IF(E{r}>=C{r},{ND(f"C{r}", f"E{r}")}-1,-({ND(f"E{r}", f"C{r}")}-1)))',
         font(10, True), None, CEN, NF_DAYS, BOX)
     put(wi, f"G{r}", f'=IF(OR($B{r}="",SUMIFS({T("DUR")},{T("TASK")},$B{r}&"*")=0),"",SUMIFS({T("WDN")},{T("TASK")},$B{r}&"*")/SUMIFS({T("DUR")},{T("TASK")},$B{r}&"*"))',
@@ -395,7 +395,7 @@ widths = dict(ID=5, TASK=50, OWN=14, P1=8, K1=9, L1=7, P2=8, K2=9, L2=7, DUR=10,
               PCT=10, REV=11, PS=12, PE=12, FS=12, FE=12, FD=10, VAR=10, DST=27, SLIP=9, IMP=28, DEP=9)
 for n in NAMES:
     wt.column_dimensions[LT[n]].width = widths.get(n, 9)
-wt.column_dimensions.group(LT["CLS"], LT["WDN"], hidden=True)
+wt.column_dimensions.group(LT["CLS"], LT["FEN"], hidden=True)
 lastvis = LT["DEP"]
 
 wt.merge_cells(f"A1:{lastvis}1")
@@ -416,7 +416,7 @@ put(wt, "A5", f'="Planned finish: "&IF({INFO}F5="","-",TEXT({INFO}F5,"dd-mmm-yy"
 wt.row_dimensions[5].height = 22
 
 groups = [("ID", "SNET", "①  TASK ENTRY", BLUE), ("STAT", "REV", "②  STATUS UPDATE", "2E7D32"),
-          ("PS", "DEP", "③  SCHEDULE & ANALYSIS (automatic)", PURPLE), ("CLS", "WDN", "helper", GREY)]
+          ("PS", "DEP", "③  SCHEDULE & ANALYSIS (automatic)", PURPLE), ("CLS", "FEN", "helper", GREY)]
 for a, b, t, col in groups:
     wt.merge_cells(f"{LT[a]}9:{LT[b]}9")
     put(wt, f"{LT[a]}9", t, font(11, True, "FFFFFF"), col, CEN)
@@ -426,7 +426,7 @@ for i, (n, h) in enumerate(zip(NAMES, HEADS)):
     put(wt, f"{LT[n]}10", h, font(9, True, "FFFFFF"), col, CEN, bd=BOX)
 wt.row_dimensions[10].height = 44
 
-HELPER_GREY = ("ID", "CLS", "HASP", "SL1", "SL2", "EFS", "EFP", "XEND", "WDN")
+HELPER_GREY = ("ID", "CLS", "HASP", "SL1", "SL2", "EFS", "EFP", "XEND", "WDN", "PEN", "FEN")
 INPUTS = ["TASK", "OWN", "P1", "K1", "L1", "P2", "K2", "L2", "DUR", "SNET", "STAT", "ACTS", "ACTE", "PCT", "REV"]
 
 
@@ -473,6 +473,8 @@ def row_formulas(r):
         "EFP": f'=IF({c("TASK")}="","",IF({c("EFS")}="Completed",1,MIN(1,N({c("PCT")}))))',
         "XEND": f'=IF(OR({c("FS")}="",NOT(ISNUMBER({c("DUR")}))),"",{W(c("FS"), "MAX(1," + c("DUR") + ")-1")})',
         "WDN": f'=IF({c("TASK")}="","",N({c("DUR")})*{c("EFP")})',
+        "PEN": f'=IF(ISNUMBER({c("PE")}),{c("PE")},0)',
+        "FEN": f'=IF(ISNUMBER({c("FE")}),{c("FE")},0)',
     }
 
 
