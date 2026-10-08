@@ -1,12 +1,18 @@
 # Gantt Chart Template
 
-A formula-driven Excel Gantt chart template (`Gantt_Chart_Template.xlsx`).
+Formula-driven Excel Gantt chart tracker.
+
+| File | What it is |
+|---|---|
+| `Project_Execution_Gantt.xlsx` | Completed Gantt for the 1.8M SMC Reflector + 4-Port C-Band Feed System + Metal Structure order (500 sets), start 15-Oct-2026, Mon–Sat working week, 30 linked tasks |
+| `Gantt_Chart_Template.xlsx` | Blank-style template with a small sample project |
+| `build_gantt_template.py` | Generator: `python3 build_gantt_template.py execution|template out.xlsx` (needs `openpyxl`) |
 
 ## Sheets
-- **Project Info** – project name, client, start / target dates, report date; schedule health, delay vs target/plan, task statistics, colour legend.
-- **Tasks** – unlimited-style task entry (300 rows ready; copy the last row down for more): duration, up to 2 predecessors, status, actual dates, % complete, revised duration. Calculates planned/forecast dates, duration variance and "delayed by" impact.
-- **Gantt** – Day / Week / Month view (cell B2), dependency markers (▶ ↳ ◀ ➜ ◆), weekend/holiday shading, status-date column, red overshoot segments, orange delayed-by-predecessor tasks.
-- **Holidays** – editable list of non-working dates (Sat/Sun automatic).
+- **Project Info** – project details, weekly-off setting, schedule health, delay vs target/plan, per-component status, statistics, colour legend.
+- **Tasks** – 300 rows ready. Enter task, duration (working days), up to 2 predecessors with link type **FS / SS / FF** and lag. Update Status, Actual Start/End, % Complete, Revised Duration; delays propagate to dependent tasks.
+- **Gantt** – Day / Week / Month view (cell B2), dependency markers, weekly-off + holiday shading, status-date column, red overshoot segments, orange delayed-by-predecessor tasks.
+- **Holidays** – editable non-working dates.
+- **Assumptions** (execution file) – rates, quantities and the basis of every duration.
 
-## Rebuild
-`python3 build_gantt_template.py [output.xlsx]` (requires `openpyxl`). The file recalculates when opened in Excel.
+Open in desktop Excel (2010+); values recalculate on open.
